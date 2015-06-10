@@ -1,4 +1,4 @@
-The UpdatableDataStats.jl package is licensed under the MIT "Expat" License:
+The Aggregators.jl package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2015: dfdx.
 >

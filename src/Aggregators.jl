@@ -1,4 +1,4 @@
-module UpdatableDataStats
+module Aggregators
 
 include("core.jl")
 

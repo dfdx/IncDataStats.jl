@@ -1,4 +1,4 @@
-using UpdatableDataStats
+using Aggregators
 using Base.Test
 
 # write your own tests here

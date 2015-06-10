@@ -9,14 +9,7 @@ type VarStats
 end
 
 
-## type Index
-##     lookup::Dict{Symbol, Int}
-##     names::Vector{Symbol}
-## end
-
-
 type Aggregator
-    # index::Index
     groups::Dict{Vector{Any}, Vector{VarStats}}
     Aggregator() = new(Dict())
 end
@@ -34,8 +27,7 @@ function updatestats!(vs::VarStats, value::Real)
 end
 
 
-function updatestats!{T<:Real}(varstats::Vector{VarStats},
-                                 values::Vector{T})
+function updatestats!{T<:Real}(varstats::Vector{VarStats}, values::Vector{T})
     for i=1:length(varstats)
         updatestats!(varstats[i], values[i])
     end
@@ -59,3 +51,4 @@ end
 #  updategroup!(grb, [1, 74, 2, .33])
 #  grb2 = where(grb, ??)
 #  histogram(grb, :d)  ==> 1) find all groups; 2) get corresponding gkey values and n_obs from first VarStats
+
