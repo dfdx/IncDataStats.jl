@@ -11,10 +11,15 @@ type VarStats
 end
 
 
-type Aggregator
+abstract Aggregator
+
+
+type StatsAggregator <: Aggregator
     groups::Dict{Vector{Any}, Vector{VarStats}}
-    Aggregator() = new(Dict())
+    StatsAggregator() = new(Dict())
 end
+
+# TODO: maybe change update* function names to reflect general idea of aggregating something
 
 
 function updatestats!(vs::VarStats, value::Real)
