@@ -1,62 +1,9 @@
 
-using Docile
 
-type VarStats
-    n_obs::Int64
-    min::Float64
-    max::Float64
-    sum::Float64
-
-    VarStats() = new(0, 0, 0, 0)
+function updategroup!{N<:Number}(grb::GroupBy, values::Vector{N})
+    aggregate!(grb.agg, values[grb.gvars], values[grb.avars])    
 end
 
-
-abstract Aggregator
-
-
-type StatsAggregator <: Aggregator
-    groups::Dict{Vector{Any}, Vector{VarStats}}
-    StatsAggregator() = new(Dict())
-end
-
-# TODO: maybe change update* function names to reflect general idea of aggregating something
-
-
-function updatestats!(vs::VarStats, value::Real)
-    vs.n_obs += 1
-    vs.sum += value
-    if value < vs.min
-        vs.min = value
-    end
-    if value > vs.max
-        vs.max = value
-    end
-end
-
-
-function updatestats!{T<:Real}(varstats::Vector{VarStats}, values::Vector{T})
-    for i=1:length(varstats)
-        updatestats!(varstats[i], values[i])
-    end
-end
-
-
-function aggregate!{T<:Real}(agg::Aggregator,
-                               gkey::Vector{Any}, values::Vector{T})
-    if !haskey(agg.groups, gkey)
-        # init new varstats group to the length of first incoming values
-        agg.groups[gkey] = [VarStats() for i=1:length(values)]
-    end
-    updatestats!(agg.groups[gkey], values)
-end
-
-
-type Index
-    names::Vector{Symbol}
-    lookup::Dict{Symbol, Int}
-    Index(names::Vector{Symbol}) =
-        Index(names, Dict([(n, i) for (i, n) in enumerate(names)]))
-end
 
 
 @doc """
@@ -75,49 +22,9 @@ function stepgrouper(step::Float64)
 end
 
 
-type GroupBy
-    vindex::Index
-    gindex::Index
-    aindex::Index
-    agg::Aggregator
+
+function do_test()
+    grb = StatsGroupBy([:a, :b, :c, :d], [:a, :c])
+    aggregate!(grb.agg, [1, 3], [2, 4])
+    updategroup!(grb, [1, 2, 3, 4])
 end
-
-
-@doc "Object for incremental grouping by some vars and aggreating the others" ->
-function GroupBy(names::Vector{Symbol}, groupers::Dict{Symbol, Function})
-    gkeys = keys(groupers)
-    gvars = filter(x -> in(x, gkeys), names)
-    avars = filter(x -> !in(x, gkeys), names)
-    vindex = Index(names)
-    gindex = Index(gvars)
-    aindex = Index(avars)
-    return GroupBy(vindex, gindex, aindex, Aggregator())
-end
-
-function GroupBy(names::Vector{Symbol}, groupfields::Vector{Symbol})
-    # shortcut with all groupers set to identity()
-end
-
-function getgroup(grb::GroupBy, values::Vector{Float64})
-    # select needed vars
-    # run groupers on each of them
-end
-    
-
-function getagg(grb::GroupBy, values::Vector{Float64})
-    
-end
-
-function updategroup!(grb::GroupBy, values::Vector{Float64})
-    # get group
-    # get aggregation vars
-    # run aggregator
-end
-
-
-# usage:
-#  grb = GroupBy(names=[:a, :b, :c, :d],
-#                groupers={Symbol, Function}[:b => identity, :d => stepfun(0.1)])
-#  updategroup!(grb, [1, 74, 2, .33])
-#  grb2 = where(grb, ??)
-#  histogram(grb, :d)  ==> 1) find all groups; 2) get corresponding gkey values and n_obs from first VarStats
