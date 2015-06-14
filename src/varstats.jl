@@ -1,8 +1,19 @@
 
+type VarStats
+    n_obs::Int64
+    min::Float64
+    max::Float64
+    var::Float64
+    sum::Float64
+
+    VarStats() = new(0, +Inf, -Inf, 0, 0)
+end
+
+
 count(vs::VarStats) = vs.n_obs
 sum(vs::VarStats) = vs.sum
-min(vs::VarStats) = vs.min
-max(vs::VarStats) = vs.max
+minimum(vs::VarStats) = vs.min
+maximum(vs::VarStats) = vs.max
 mean(vs::VarStats) = vs.sum / vs.n_obs
 var(vs::VarStats) = vs.var
 std(vs::VarStats) = sqrt(vs.var)
@@ -29,18 +40,4 @@ function updatestats!{T<:Real}(varstats::Vector{VarStats}, values::Vector{T})
         updatestats!(varstats[i], values[i])
     end
 end
-
-
-function aggregate!{K,N<:Number}(agg::StatsAggregator{K},
-                               key::K, values::Vector{N})
-    if !haskey(agg.groups, key)
-        # init new varstats group to the length of first incoming values
-        agg.groups[key] = [VarStats() for i=1:length(values)]
-    end
-    updatestats!(agg.groups[key], values)
-end
-
-keys(agg::StatsAggregator) = keys(agg.groups)
-values(agg::StatsAggregator) = values(agg.groups)
-getindex{K}(agg::StatsAggregator{K}, k::K) = getindex(agg.groups, k)
 

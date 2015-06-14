@@ -18,11 +18,11 @@ type VarStats
 end
 
 
-type StatsAggregator{K} <: Aggregator
-    groups::Dict{K, Vector{VarStats}}
+type StatsAggregator <: Aggregator
+    
 end
 
-StatsAggregator(K::DataType) = StatsAggregator{K}(Dict{K, Vector{VarStats}}())
+StatsAggregator() = StatsAggregator(Dict{Any, Vector{VarStats}}())
 
 show(io::IO, agg::StatsAggregator) =
     print(io, "StatsAggregator($(keys(agg.groups)))")
@@ -45,7 +45,7 @@ type StatsGroupBy <: GroupBy
     index::Index
     gvars::Vector{Int}  # indexes of vars to group by
     avars::Vector{Int}  # indexes of vars to aggregate
-    agg::StatsAggregator{Vector{Number}}
+    agg::StatsAggregator
     groupers::Dict{Symbol, Function}
 end
 
@@ -55,7 +55,7 @@ function StatsGroupBy(names::Vector{Symbol}, groupers::Dict{Symbol, Function})
     gvars = [index.lookup[name] for name in gnames]
     anames = filter(x -> !in(x, keys(groupers)), names)
     avars = [index.lookup[name] for name in anames]
-    agg = StatsAggregator(Vector{Number})
+    agg = StatsAggregator()
     return StatsGroupBy(index, gvars, avars, agg, groupers)
 end
 

@@ -1,19 +1,8 @@
 
-using Compat
 using Docile
-import Base.min
-import Base.max
-import Base.mean
-import Base.var
-import Base.std
-import Base.count
-import Base.sum
-import Base.keys
-import Base.values
-import Base.show
+using Compat
+import Base: minimum, maximum, mean, var, std, count, sum, hist
+import Base: haskey, keys, values, show
 
-include("types.jl")
-include("aggr.jl")
-include("statsaggr.jl")
+include("varstats.jl")
 include("groupby.jl")
-
