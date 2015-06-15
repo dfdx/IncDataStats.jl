@@ -74,7 +74,7 @@ function hist_from_counts{T<:Real}(counts::Dict{T, Int})
     end
     sorted_counts = sort([(v, c) for (v, c) in sum_counts], by=b->b[1])
     bins = [v for (v, c) in sorted_counts]
-    counts = [v for (v, c) in sorted_counts]
+    counts = [c for (v, c) in sorted_counts]
     return bins, counts
 end
 
@@ -90,19 +90,16 @@ end
 
 
 function quantile(grb::GroupBy, name::Symbol, q::Real)
+    @assert (0 <= q <= 1) "Quantile is $q, should be in [0..1]"
     (bins, h) = hist(grb, name)
     qs = q * sum(h)
-    
-    
-
-end
-
-function do_test()
-    grb = GroupBy([:a, :b, :c, :d], [:a, :c])    
-    update!(grb, [1, 2, 3, 4])
-    update!(grb, [1, 3.2, 3, 7])
-    update!(grb, [2, 2, 1, 4])
-    update!(grb, [2, 2, 7, 4])
+    s = 0
+    i = 0
+    while s < qs
+        i += 1
+        s += h[i]        
+    end
+    return if i > 0 bins[i] else 1. end
 end
 
 
