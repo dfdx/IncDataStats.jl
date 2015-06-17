@@ -23,3 +23,11 @@ bins, h = hist(grb, :c)
 @test quantile(grb, :c, .5) == 3
 @test quantile(grb, :c, .75) == 3
 @test quantile(grb, :c, .9) == 7
+
+# groupers test
+
+grb = GroupBy([:a, :b, :c, :d], [:a => identity, :c => stepgrouper(3)])
+update!(grb, [1, 2, 3, 4])
+update!(grb, [1, 3.2, 3, 7])
+update!(grb, [2, 2, 1, 4])
+update!(grb, [2, 2, 7, 4])

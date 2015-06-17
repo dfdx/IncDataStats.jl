@@ -32,13 +32,24 @@ show(io::IO, grb::GroupBy) =
     print(io, "GroupBy($(grb.index.names),$(keys(grb.groupers)))")
 
 
+function applygroupers{T<:Real}(grb::GroupBy, values::Vector{T})
+    @assert length(grb.index.names) == length(values) "number of names != number of values"
+    grouped = copy(values)
+    for name in keys(grb.groupers)
+        idx = grb.index.lookup[name]
+        grouped[idx] = grb.groupers[name](grouped[idx])
+    end
+    return grouped
+end
+
 function update!{T<:Real}(grb::GroupBy, values::Vector{T})
-    key = values[grb.gvars]
+    groupedvalues = applygroupers(grb, values)
+    key = groupedvalues[grb.gvars]
     if !haskey(grb.groups, key)
         # init new varstats group to the length of first incoming values
-        grb.groups[key] = [VarStats() for i=1:length(values)]
+        grb.groups[key] = [VarStats() for i=1:length(groupedvalues)]
     end
-    updatestats!(grb.groups[key], values)
+    updatestats!(grb.groups[key], groupedvalues)
 end
 
 
@@ -103,3 +114,21 @@ function quantile(grb::GroupBy, name::Symbol, q::Real)
 end
 
 
+
+
+# groupers
+
+@doc """
+Create grouper that adjusts value to the nearest multiple of step.
+Usage:
+    grouper = stepgrouper(5)
+    grouper(75) ==> 75
+    grouper(78) ==> 80
+    grouper(80) ==> 80
+""" ->
+function stepgrouper(step::Real)
+    function grouper(value)
+        round(value / step) * step
+    end
+    return grouper
+end

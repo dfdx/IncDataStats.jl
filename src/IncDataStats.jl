@@ -8,7 +8,8 @@ export GroupBy,
        sum,
        count,
        hist,
-       quantile
+       quantile,
+       stepgrouper
        
 
 include("core.jl")
